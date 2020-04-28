@@ -1,9 +1,4 @@
-#include<iostream>
-
-int main(){
-
-    std::cout<<"hello dino"<<std::endl;
-
-
-    return 0;
+#include <iostream>
+int main() {
+  return EXIT_SUCCESS;
 }
