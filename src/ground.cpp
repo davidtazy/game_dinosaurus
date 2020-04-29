@@ -26,6 +26,7 @@ void Ground::resize(int width, int height) {
 }
 
 void Ground::draw(sf::RenderTarget& render, int speed) {
+  // ensure ground always visible through all width
   if (_sprite.getPosition().x + render.getSize().x < 0) {
     _sprite.setPosition(sf::Vector2f(0, render.getSize().y - _height));
   }

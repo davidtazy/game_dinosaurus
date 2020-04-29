@@ -2,6 +2,7 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 
+#include "dino.h"
 #include "ground.h"
 
 int main() {
@@ -11,6 +12,7 @@ int main() {
   window.setFramerateLimit(60);
 
   Ground ground(resource_dir + "/ground.png");
+  Dino dino(resource_dir + "/dino");
 
   // run the program as long as the window is open
   while (window.isOpen()) {
@@ -26,12 +28,14 @@ int main() {
 
         auto [width, height] = window.getSize();
         ground.resize(width, height);
+        dino.resize(width, height);
       }
     }
 
     window.clear();
 
     ground.draw(window, 5);
+    dino.draw(window, 0);
 
     window.display();
   }
