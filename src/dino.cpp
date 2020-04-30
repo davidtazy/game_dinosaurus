@@ -1,10 +1,23 @@
 
 
+#include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
 
 #include "dino.h"
+
+struct JumpPosAnimation : public SubAnimation {
+  sf::Shape& shape;
+  sf::Vector2f init_pos{-1, -1};
+  JumpPosAnimation(sf::Shape& shape) : shape(shape) {}
+
+  void on_start() override { init_pos = shape.getPosition(); }
+
+  void update(int percent) override {
+    shape.setPosition(init_pos.x, init_pos.y + ::sin(-3.14 * percent / 100.) * 150);
+  }
+};
 
 Dino::Dino(const std::string& texture_dir, int height)
     : _anim_idle{texture_dir, "Idle"},
@@ -14,10 +27,12 @@ Dino::Dino(const std::string& texture_dir, int height)
       _anim_die{texture_dir, "Dead"},
       _height(height) {
   for (auto& anim : {&_anim_idle, &_anim_walk, &_anim_run, &_anim_jump, &_anim_die}) {
-    anim->set_duration(std::chrono::milliseconds(5000)).set_shape(_rectangle);
+    anim->set_duration(std::chrono::milliseconds(2500)).set_shape(_rectangle);
   }
+
+  static JumpPosAnimation jump_pos_anim(_rectangle);
   _anim_die.set_repeated(false);
-  _anim_jump.set_repeated(false);
+  _anim_jump.set_repeated(false).set_sub_animation(jump_pos_anim);
   _anim_walk.set_repeated(false);
 
   _next_anim = &_anim_idle;
@@ -27,9 +42,13 @@ Dino::Dino(const std::string& texture_dir, int height)
     _next_anim = nullptr;
     if (state.is_walking())
       _next_anim = &_anim_walk;
-    else if (state.is_running())
+    else if (state.is_running()) {
+      if (_on_start_running_callback) {
+        _on_start_running_callback();
+        _on_start_running_callback = nullptr;
+      }
       _next_anim = &_anim_run;
-    else if (state.is_jumping())
+    } else if (state.is_jumping())
       _next_anim = &_anim_jump;
     else if (state.is_pause())
       _next_anim = &_anim_idle;
@@ -47,13 +66,11 @@ Dino::Dino(const std::string& texture_dir, int height)
 }
 
 void Dino::resize(int width, int height) {
-  _rectangle.setSize(sf::Vector2f{200, 2 * _height});
+  _rectangle.setSize(sf::Vector2f{200, static_cast<float>(2 * _height)});
   _rectangle.setPosition(sf::Vector2f(0, height - 3 * _height));
 }
 
 void Dino::draw(sf::RenderTarget& render, int speed) {
-  //_sprite.setScale(0.5, 0.5);
-
   render.draw(_rectangle);
 }
 
@@ -64,7 +81,8 @@ void Dino::on_timer(std::chrono::milliseconds now) {
     _anim->start(now);
   }
   _anim->update(now);
-  if (_anim && _anim->is_finished(now)) {
+
+  if (_anim->is_finished(now)) {
     state.on_animation_finished();  // ! state may change
     return;
   }

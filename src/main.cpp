@@ -4,9 +4,9 @@
 #include <chrono>
 #include <iostream>
 
+#include "cactus.h"
 #include "dino.h"
 #include "ground.h"
-
 std::chrono::milliseconds get_now(std::chrono::high_resolution_clock::time_point start) {
   auto now = std::chrono::high_resolution_clock::now();
   return std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
@@ -14,16 +14,19 @@ std::chrono::milliseconds get_now(std::chrono::high_resolution_clock::time_point
 
 int main() {
   auto start = std::chrono::high_resolution_clock::now();
+  int speed = 0;
 
   std::string resource_dir = RESOURCES_DIR;
 
   sf::RenderWindow window(sf::VideoMode(800, 600), "Dinausaurus");
   window.setFramerateLimit(60);
 
-  Ground ground(resource_dir + "/ground.png");
+  Ground ground(resource_dir + "/ground.png", 120);
   Dino dino(resource_dir + "/dino");
+  CactusFactory cactus_factory(resource_dir + "/cactus.png", 9, 1);
+  Cactus cactus = cactus_factory.create();
 
-  dino.on_timer(get_now(start));
+  dino.on_start_running([&speed]() { speed = 5; });
 
   // run the program as long as the window is open
   while (window.isOpen()) {
@@ -42,11 +45,15 @@ int main() {
           auto [width, height] = window.getSize();
           ground.resize(width, height);
           dino.resize(width, height);
+          cactus.resize(width, height);
           break;
         }
         case sf::Event::KeyPressed:
-          dino.on_play();
-          dino.on_jump();
+          if (dino.get_state().is_pause()) {
+            dino.on_play();
+            speed = 2;
+          } else
+            dino.on_jump();
           break;
 
         default:
@@ -56,11 +63,13 @@ int main() {
 
     auto now = get_now(start);
 
+    cactus.on_timer(now);
     dino.on_timer(now);
 
     window.clear();
 
-    ground.draw(window, 5);
+    ground.draw(window, speed);
+    cactus.draw(window, speed);
     dino.draw(window, 0);
 
     window.display();

@@ -18,10 +18,14 @@ class Dino {
   void draw(sf::RenderTarget& render, int speed);
   void resize(int width, int height);
 
+  void on_start_running(std::function<void()> callback) { _on_start_running_callback = callback; }
+
   void on_timer(std::chrono::milliseconds elapsed);
   void on_play();
   void on_pause();
   void on_jump();
+
+  const DinoState& get_state() const { return state; }
 
  private:
   Animation _anim_idle;
@@ -32,6 +36,6 @@ class Dino {
   Animation *_anim{}, *_next_anim{};
   sf::RectangleShape _rectangle;
   int _height{100};
-
+  std::function<void()> _on_start_running_callback;
   DinoState state;
 };

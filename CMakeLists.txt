@@ -14,7 +14,7 @@ set (CMAKE_CXX_EXTENSIONS           OFF)
 
 
 
-add_library(Common src/ground.cpp src/dino.cpp src/animation.cpp)
+add_library(Common src/ground.cpp src/dino.cpp src/animation.cpp src/cactus.cpp)
 target_link_libraries(Common PUBLIC sfml::sfml stdc++fs)
 target_include_directories(Common PUBLIC src)
 target_compile_definitions(Common PUBLIC RESOURCES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources" )

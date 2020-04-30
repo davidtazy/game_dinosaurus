@@ -4,12 +4,42 @@
 
 #include "animation.h"
 
-Animation::Animation(std::string texture_dir, std::string prefix) : name{prefix} {
+void throw_if_not_exists(std::string file, std::string msg) {
+  if (!std::filesystem::exists(std::filesystem::path{file})) {
+    throw std::runtime_error(msg);
+  }
+}
+
+Animation::Animation(std::string texture_file, int nb_col, int nb_row) {
   std::ostringstream error;
-  if (!std::filesystem::exists(std::filesystem::path{texture_dir})) {
-    error << "Dino::Dino: texture dir at " << texture_dir << " does not exists";
+  error << "Dino::Dino: texture file at " << texture_file << " does not exists";
+  throw_if_not_exists(texture_file, error.str());
+
+  if (!image.loadFromFile(texture_file)) {
+    error << "Animation::Animation: image  at " << texture_file << " load fail";
     throw std::runtime_error(error.str());
   }
+
+  auto [width, height] = image.getSize();
+  auto w = width / nb_col;
+  auto h = height / nb_row;
+
+  for (int col = 0; col < nb_col; col++) {
+    for (int row = 0; row < nb_row; row++) {
+      _texture.push_back(sf::Texture{});
+      if (!_texture.back().loadFromImage(image, sf::IntRect{col * w, row * h, w, h})) {
+        error << "Animation::Animation: texture  from image at " << col << " " << row
+              << " load fail";
+        throw std::runtime_error(error.str());
+      }
+    }
+  }
+}
+
+Animation::Animation(std::string texture_dir, std::string prefix) : name{prefix} {
+  std::ostringstream error;
+  error << "Dino::Dino: texture dir at " << texture_dir << " does not exists";
+  throw_if_not_exists(texture_dir, error.str());
 
   auto files = find_files(texture_dir, prefix);
 
@@ -45,6 +75,10 @@ int Animation::texture_index(std::chrono::milliseconds elapsed_p) const {
   return tex_index;
 }
 
+int Animation::frame_index_to_percent(int index) const {
+  return remap(index, 0, _texture.size(), 0, 99, true);
+}
+
 void Animation::update(std::chrono::milliseconds now_p) {
   int index = texture_index(now_p);
 
@@ -54,6 +88,9 @@ void Animation::update(std::chrono::milliseconds now_p) {
   if (shape) {
     shape->setTexture(&_texture.at(index));
   }
+
+  if (_sub_anim)
+    _sub_anim->update(frame_index_to_percent(index));
 }
 
 int Animation::remap(int value, int start1, int stop1, int start2, int stop2, bool withinBounds) {
