@@ -27,8 +27,6 @@ int main() {
 
   // run the program as long as the window is open
   while (window.isOpen()) {
-    bool key_jump = false;
-
     // check all the window's events that were triggered since the last iteration of the loop
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -47,7 +45,8 @@ int main() {
           break;
         }
         case sf::Event::KeyPressed:
-          key_jump = true;
+          dino.on_play();
+          dino.on_jump();
           break;
 
         default:
@@ -58,12 +57,6 @@ int main() {
     auto now = get_now(start);
 
     dino.on_timer(now);
-
-    if (key_jump)
-      std::cerr << "jummppp" << std::endl;
-    else {
-      std::cerr << std::endl;
-    }
 
     window.clear();
 

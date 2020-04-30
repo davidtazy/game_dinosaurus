@@ -30,6 +30,15 @@ TEST_CASE("sfml can load file") {
 
 #include "dino_state.h"
 
+TEST_CASE("dino state machine callback") {
+  DinoState state;
+  int evt_counter{};
+  state.on_new_state([&evt_counter]() { evt_counter++; });
+  REQUIRE(evt_counter == 0);
+  state.on_play();
+  REQUIRE(evt_counter == 1);
+}
+
 TEST_CASE("dino state machine") {
   DinoState state;
 
@@ -48,62 +57,45 @@ TEST_CASE("dino state machine") {
     REQUIRE(state.is_pause());
     state.on_pause();
     REQUIRE(state.is_pause());
-    state.on_timer(std::chrono::milliseconds::zero());
+    state.on_animation_finished();
     REQUIRE(state.is_pause());
 
     state.on_play();
     REQUIRE_FALSE(state.is_pause());
 
     REQUIRE(state.is_walking());
-  }
 
-  state.on_play();
-  state.on_timer(std::chrono::milliseconds{0});
+    SECTION("dino switch from walk to run after  animation finished") {
+      REQUIRE(state.is_walking());
 
-  SECTION("dino switch from walk to run after 100% animation") {
-    REQUIRE(state.is_walking());
-    std::chrono::milliseconds elapsed{0};
-    int percent = 0;
-    while (state.is_walking()) {
-      elapsed += std::chrono::milliseconds{50};
-      REQUIRE(percent < state.animation_percent(elapsed));
-      percent = state.animation_percent(elapsed);
-      // std::cerr << "percent is " << percent << std::endl;
-      state.on_timer(elapsed);
-    }
-
-    REQUIRE(state.is_running());
-  }
-
-  state.on_timer(std::chrono::milliseconds{1000});
-
-  SECTION("dino die on collision") {
-    REQUIRE(state.is_running());
-    state.on_collision();
-    REQUIRE(state.is_died());
-  }
-
-  SECTION("can jump in running state") {
-    REQUIRE(state.is_running());
-
-    state.on_jump();
-    REQUIRE(state.is_jumping());
-    SECTION("dino back to run after 100% animation") {
-      std::chrono::milliseconds elapsed{0};
-      int count = 0;
-      while (state.is_jumping()) {
-        elapsed += std::chrono::milliseconds{50};
-        state.on_timer(elapsed);
-        count++;
-      }
-      REQUIRE(count > 18);
+      state.on_animation_finished();
 
       REQUIRE(state.is_running());
-    }
-    SECTION("dino die on collision") {
-      REQUIRE(state.is_jumping());
-      state.on_collision();
-      REQUIRE(state.is_died());
+
+      SECTION("dino die on collision") {
+        REQUIRE(state.is_running());
+        state.on_collision();
+        REQUIRE(state.is_died());
+      }
+
+      SECTION("can jump in running state") {
+        REQUIRE(state.is_running());
+
+        state.on_jump();
+        REQUIRE(state.is_jumping());
+
+        SECTION("dino die on collision") {
+          REQUIRE(state.is_jumping());
+          state.on_collision();
+          REQUIRE(state.is_died());
+        }
+
+        SECTION("back to Running when animation finished") {
+          REQUIRE(state.is_jumping());
+          state.on_animation_finished();
+          REQUIRE(state.is_running());
+        }
+      }
     }
   }
 }

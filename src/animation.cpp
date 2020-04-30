@@ -4,7 +4,7 @@
 
 #include "animation.h"
 
-Animation::Animation(std::string texture_dir, std::string prefix) {
+Animation::Animation(std::string texture_dir, std::string prefix) : name{prefix} {
   std::ostringstream error;
   if (!std::filesystem::exists(std::filesystem::path{texture_dir})) {
     error << "Dino::Dino: texture dir at " << texture_dir << " does not exists";
@@ -35,12 +35,12 @@ std::set<std::string> Animation::find_files(std::string texture_dir, std::string
 
 int Animation::texture_index(std::chrono::milliseconds elapsed_p) const {
   auto now = elapsed_p;
-  if (repeat) {
-    now = (now - start_point) % duration;
-  }
 
-  int tex_index = remap(now.count(), start_point.count(), (start_point + duration).count(), 0,
-                        _texture.size(), true);
+  now = (now - start_point) % duration;
+
+  int tex_index = remap(now.count(), 0, duration.count(), 0, _texture.size(), true);
+  if (tex_index == _texture.size())
+    tex_index--;
 
   return tex_index;
 }
@@ -50,6 +50,9 @@ void Animation::update(std::chrono::milliseconds now_p) {
 
   if (sprite) {
     sprite->setTexture(_texture.at(index));
+  }
+  if (shape) {
+    shape->setTexture(&_texture.at(index));
   }
 }
 

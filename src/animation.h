@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Graphics/Shape.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -11,6 +12,10 @@ struct Animation {
 
   Animation& set_sprite(sf::Sprite& sprite_p) {
     sprite = &sprite_p;
+    return *this;
+  }
+  Animation& set_shape(sf::Shape& shape_p) {
+    shape = &shape_p;
     return *this;
   }
   Animation& set_repeated(bool repeated = true) {
@@ -49,11 +54,16 @@ struct Animation {
                    int stop2,
                    bool withinBounds = false);
 
+  std::string get_name() const { return name; }
+  int nb_frame() const { return _texture.size(); }
+
  private:
   std::vector<sf::Texture> _texture;
 
   sf::Sprite* sprite{};
+  sf::Shape* shape{};
   bool repeat{true};
   std::chrono::milliseconds duration{1000};
   std::chrono::milliseconds start_point{std::chrono::milliseconds::max()};
+  std::string name;
 };

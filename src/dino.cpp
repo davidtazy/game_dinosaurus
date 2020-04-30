@@ -14,35 +14,69 @@ Dino::Dino(const std::string& texture_dir, int height)
       _anim_die{texture_dir, "Dead"},
       _height(height) {
   for (auto& anim : {&_anim_idle, &_anim_walk, &_anim_run, &_anim_jump, &_anim_die}) {
-    anim->set_duration(std::chrono::milliseconds(1000)).set_sprite(_sprite);
+    anim->set_duration(std::chrono::milliseconds(5000)).set_shape(_rectangle);
   }
   _anim_die.set_repeated(false);
   _anim_jump.set_repeated(false);
   _anim_walk.set_repeated(false);
 
+  _next_anim = &_anim_idle;
   _anim = nullptr;
+
+  state.on_new_state([&]() {
+    _next_anim = nullptr;
+    if (state.is_walking())
+      _next_anim = &_anim_walk;
+    else if (state.is_running())
+      _next_anim = &_anim_run;
+    else if (state.is_jumping())
+      _next_anim = &_anim_jump;
+    else if (state.is_pause())
+      _next_anim = &_anim_idle;
+    else if (state.is_died())
+      _next_anim = &_anim_die;
+    else {
+      throw std::runtime_error("dino new state, unhandled unkow state ");
+    }
+
+    if (_anim != _next_anim) {
+      std::cerr << "next anim is " << _next_anim->get_name() << std::endl;
+      _anim = nullptr;
+    }
+  });
 }
 
 void Dino::resize(int width, int height) {
-  int h = _sprite.getTextureRect().height;
-  //_sprite.setOrigin(0, h / 3);
-
-  // _sprite.setTextureRect(sf::IntRect{0, 0, 2 * width, _height});
-
-  _sprite.setPosition(sf::Vector2f(width / 4, height - h));
+  _rectangle.setSize(sf::Vector2f{200, 2 * _height});
+  _rectangle.setPosition(sf::Vector2f(0, height - 3 * _height));
 }
 
 void Dino::draw(sf::RenderTarget& render, int speed) {
   //_sprite.setScale(0.5, 0.5);
 
-  render.draw(_sprite);
+  render.draw(_rectangle);
 }
 
 void Dino::on_timer(std::chrono::milliseconds now) {
+  // load new animation
   if (_anim == nullptr) {
-    _anim = &_anim_idle;
+    _anim = _next_anim;
     _anim->start(now);
   }
   _anim->update(now);
-  // std::cerr << "now is " << now.count() << " index is " << _anim->texture_index(now);
+  if (_anim && _anim->is_finished(now)) {
+    state.on_animation_finished();  // ! state may change
+    return;
+  }
+  std::cerr << _anim->get_name() << " now is " << now.count() << " index is "
+            << _anim->texture_index(now) << "/" << _anim->nb_frame() << std::endl;
+}
+void Dino::on_play() {
+  state.on_play();
+}
+void Dino::on_pause() {
+  state.on_pause();
+}
+void Dino::on_jump() {
+  state.on_jump();
 }

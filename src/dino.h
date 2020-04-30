@@ -1,12 +1,14 @@
 #pragma once
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
-#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
+
 #include <array>
 #include <chrono>
 #include <string>
 #include <vector>
+
 #include "animation.h"
 #include "dino_state.h"
 
@@ -27,8 +29,8 @@ class Dino {
   Animation _anim_run;
   Animation _anim_jump;
   Animation _anim_die;
-  Animation* _anim;
-  sf::Sprite _sprite;
+  Animation *_anim{}, *_next_anim{};
+  sf::RectangleShape _rectangle;
   int _height{100};
 
   DinoState state;
