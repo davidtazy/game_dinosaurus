@@ -37,7 +37,7 @@ jobs:
         cd ..
         
 
-    - name: build and test
+    - name: build 
       run: |
         source kcov/activate.sh
         mkdir build 
@@ -45,4 +45,7 @@ jobs:
         conan install .. 
         cmake ..
         cmake --build . --target all
-        ctest
+        
+    - name: test
+      run: |
+        ctest -V
