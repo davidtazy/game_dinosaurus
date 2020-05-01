@@ -23,7 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install conan
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: conan kcov and ...
+    - name: conan kcov 
       run: |
         git clone https://github.com/davidtazy/conan-kcov kcov
         cd kcov
@@ -31,17 +31,18 @@ jobs:
         conan profile new default --detect
         conan profile update settings.compiler.libcxx=libstdc++11 default
         conan install cmake_installer/3.16.3@conan/stable  -g=virtualenv
+        conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
         source activate.sh
         bash workflow.sh
         cd ..
+        
+
+    - name: build and test
+      run: |
+        source kcov/activate.sh
         mkdir build 
         cd build
         conan install .. 
         cmake ..
         cmake --build . --target all
         ctest
-
-
-    - name: Test with pytest
-      run: |
-        true
