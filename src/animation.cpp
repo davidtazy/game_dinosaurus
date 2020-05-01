@@ -1,11 +1,13 @@
-#include <filesystem>
+#include <experimental/filesystem>
 
 #include <sstream>
 
 #include "animation.h"
 
+namespace stdfs = std::experimental::filesystem;
+
 void throw_if_not_exists(std::string file, std::string msg) {
-  if (!std::filesystem::exists(std::filesystem::path{file})) {
+  if (!stdfs::exists(stdfs::path{file})) {
     throw std::runtime_error(msg);
   }
 }
@@ -54,7 +56,7 @@ Animation::Animation(std::string texture_dir, std::string prefix) : name{prefix}
 
 std::set<std::string> Animation::find_files(std::string texture_dir, std::string prefix) {
   std::set<std::string> files;  // dir iterator is not known
-  for (auto& p : std::filesystem::directory_iterator(std::filesystem::path{texture_dir})) {
+  for (auto& p : stdfs::directory_iterator(stdfs::path{texture_dir})) {
     std::string file = p.path().generic_string();
     if (p.path().filename().generic_string().find(prefix) == 0) {
       files.insert(file);

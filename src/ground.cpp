@@ -1,10 +1,12 @@
 #include "ground.h"
-#include <filesystem>
+#include <experimental/filesystem>
 #include <iostream>
 #include <sstream>
 
+namespace stdfs = std::experimental::filesystem;
+
 Ground::Ground(const std::string& texture_filepath, int height) : _height(height) {
-  if (!std::filesystem::exists(std::filesystem::path{texture_filepath})) {
+  if (!stdfs::exists(stdfs::path{texture_filepath})) {
     std::ostringstream error;
     error << "Ground::Ground: texture at " << texture_filepath << " does not exists";
     throw std::runtime_error(error.str());
