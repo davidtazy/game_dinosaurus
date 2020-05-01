@@ -86,8 +86,8 @@ void Dino::on_timer(std::chrono::milliseconds now) {
     state.on_animation_finished();  // ! state may change
     return;
   }
-  std::cerr << _anim->get_name() << " now is " << now.count() << " index is "
-            << _anim->texture_index(now) << "/" << _anim->nb_frame() << std::endl;
+  // std::cerr << _anim->get_name() << " now is " << now.count() << " index is "
+  //           << _anim->texture_index(now) << "/" << _anim->nb_frame() << std::endl;
 }
 void Dino::on_play() {
   state.on_play();

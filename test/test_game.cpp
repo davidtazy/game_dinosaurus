@@ -1,8 +1,13 @@
+
+#include <SFML/Graphics/RenderTexture.hpp>
+
 #include <catch2/catch.hpp>
 #include "cactus.h"
 #include "dino.h"
 #include "game.h"
 #include "ground.h"
+#include "replay.h"
+
 TEST_CASE("untested objects -for accurate coverage report") {
   std::string resource_dir = RESOURCES_DIR;
   std::string dino_resources = resource_dir + "/dino";
@@ -10,8 +15,77 @@ TEST_CASE("untested objects -for accurate coverage report") {
   CactusFactory::untested();
   Dino dino(dino_resources);
   Ground ground(resource_dir + "/ground.png");
+}
 
-  Game game("dsdsqd");
+TEST_CASE("game e2e render in texture") {
+  std::string test_dir = UNITEST_DIR;
+  std::string resource_dir = RESOURCES_DIR;
+  Game game(resource_dir);
+
+  // auto window = game.createWindow(800, 600, "title");
+  auto window = sf::RenderTexture{};
+  REQUIRE(window.create(800, 600) == true);
+  // window.setFramerateLimit(30);
+
+  Replay replay(test_dir + "/record.gm");
+
+  std::chrono::milliseconds now{};
+
+  while (replay.can_pull()) {
+    auto sample = replay.pull();
+    game.loop(window, sample.event, sample.timestamp);
+    window.display();
+  }
+  // window.close();
+}
+
+TEST_CASE("game e2e replay", "[.integration]") {
+  std::string test_dir = UNITEST_DIR;
+  std::string resource_dir = RESOURCES_DIR;
+  Game game(resource_dir);
+
+  auto window = game.createWindow(800, 600, "title");
+  // window.setFramerateLimit(30);
+
+  Replay replay(test_dir + "/record.gm");
+
+  std::chrono::milliseconds now{};
+
+  while (replay.can_pull()) {
+    auto sample = replay.pull();
+    game.loop(window, sample.event, sample.timestamp);
+    window.display();
+  }
+  window.close();
+}
+
+#include <sstream>
+#include "replay.h"
+TEST_CASE("record/replay") {
+  std::stringstream stream;
+  Record rec(stream);
+  auto ts1 = std::chrono::milliseconds(123);
+  auto ts2 = std::chrono::milliseconds(456);
+  sf::Event e1, e2;
+  e1.type = sf::Event::Resized;
+  e1.size.height = 600;
+  e1.size.width = 800;
+
+  e2.type = sf::Event::EventType::GainedFocus;
+
+  rec.push({ts1, e1});
+  rec.push({ts2, e2});
+
+  Replay rep(stream);
+  REQUIRE(rep.can_pull() == true);
+  auto st = rep.pull();
+  REQUIRE(st.timestamp == ts1);
+  REQUIRE(st.event.type == e1.type);
+  st = rep.pull();
+  REQUIRE(st.timestamp == ts2);
+  REQUIRE(st.event.type == e2.type);
+
+  REQUIRE(rep.can_pull() == false);
 }
 
 /*********************************************

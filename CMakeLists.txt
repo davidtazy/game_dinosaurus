@@ -30,10 +30,13 @@ add_library(Common  STATIC
     src/dino.cpp 
     src/animation.cpp 
     src/cactus.cpp 
-    src/game.cpp)
+    src/game.cpp
+    src/replay.h)
 target_link_libraries(Common PUBLIC sfml::sfml stdc++fs)
 target_include_directories(Common PUBLIC src)
-target_compile_definitions(Common PUBLIC RESOURCES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources" )
+target_compile_definitions(Common 
+    PUBLIC 
+        RESOURCES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources" )
 
 ########### main #############
 add_executable(${PROJECT_NAME} src/main.cpp)
@@ -44,6 +47,7 @@ target_link_libraries(${PROJECT_NAME}  Common)
 find_program(KCOV kcov)
 message("kcov: ${KCOV}")
 add_executable(test_sfml test/test_sfml.cpp test/test_game.cpp test/main_catch.cpp)
+target_compile_definitions(test_sfml PUBLIC UNITEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test")
 target_link_libraries(test_sfml  Catch2::Catch2 Common)
 
 if( KCOV )
