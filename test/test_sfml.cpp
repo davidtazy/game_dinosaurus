@@ -30,77 +30,11 @@ TEST_CASE("sfml can load file") {
 
 #include "dino_state.h"
 
-TEST_CASE("dino state machine callback") {
-  DinoState state;
-  int evt_counter{};
-  state.on_new_state([&evt_counter]() { evt_counter++; });
-  REQUIRE(evt_counter == 0);
-  state.on_play();
-  REQUIRE(evt_counter == 1);
-}
+/************************************************
+ *               Animations
+ * *********************************************/
 
-TEST_CASE("dino state machine") {
-  DinoState state;
-
-  SECTION("initial state is Pause") {
-    REQUIRE(state.is_pause());
-    REQUIRE_FALSE(state.is_died());
-    REQUIRE_FALSE(state.is_jumping());
-    REQUIRE_FALSE(state.is_running());
-    REQUIRE_FALSE(state.is_walking());
-  }
-
-  SECTION("Pause ignore all event except StartEvent") {
-    state.on_collision();
-    REQUIRE(state.is_pause());
-    state.on_jump();
-    REQUIRE(state.is_pause());
-    state.on_pause();
-    REQUIRE(state.is_pause());
-    state.on_animation_finished();
-    REQUIRE(state.is_pause());
-
-    state.on_play();
-    REQUIRE_FALSE(state.is_pause());
-
-    REQUIRE(state.is_walking());
-
-    SECTION("dino switch from walk to run after  animation finished") {
-      REQUIRE(state.is_walking());
-
-      state.on_animation_finished();
-
-      REQUIRE(state.is_running());
-
-      SECTION("dino die on collision") {
-        REQUIRE(state.is_running());
-        state.on_collision();
-        REQUIRE(state.is_died());
-      }
-
-      SECTION("can jump in running state") {
-        REQUIRE(state.is_running());
-
-        state.on_jump();
-        REQUIRE(state.is_jumping());
-
-        SECTION("dino die on collision") {
-          REQUIRE(state.is_jumping());
-          state.on_collision();
-          REQUIRE(state.is_died());
-        }
-
-        SECTION("back to Running when animation finished") {
-          REQUIRE(state.is_jumping());
-          state.on_animation_finished();
-          REQUIRE(state.is_running());
-        }
-      }
-    }
-  }
-}
-
-TEST_CASE("load dino animations") {
+TEST_CASE("load  animations in dir") {
   std::string resource_dir = RESOURCES_DIR;
   std::string dino_resources = resource_dir + "/dino";
 
@@ -135,4 +69,12 @@ TEST_CASE("load dino animations") {
 
     std::cerr << anim.texture_index(now) << std::endl;
   }
+}
+
+TEST_CASE("load animation from file ") {
+  std::string resource_dir = RESOURCES_DIR;
+
+  Animation anim(resource_dir + "/cactus.png", 9, 1);
+
+  REQUIRE(anim.nb_frame() == 9);
 }

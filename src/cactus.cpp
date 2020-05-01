@@ -30,3 +30,5 @@ void Cactus::draw(sf::RenderTarget& render, int speed) {
 void Cactus::on_timer(std::chrono::milliseconds now) {
   // move
 }
+
+void CactusFactory::untested(){};

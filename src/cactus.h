@@ -22,4 +22,6 @@ struct CactusFactory {
   Cactus create();
 
   Animation _anim;
+
+  static void untested();
 };
