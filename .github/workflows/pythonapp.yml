@@ -46,7 +46,8 @@ jobs:
         cd ..
         
     - name: build
-      env: COVERALLS_ID:${{ secrets.COVERALLS_ID }}
+      env: 
+        COVERALLS_ID: ${{ secrets.COVERALLS_ID }}
       run: |
         cd build
         cmake ..
