@@ -47,6 +47,7 @@ jobs:
         
     - name: build 
       run: |
+        cd build
         cmake ..
         cmake --build . --target all
         cd ..
