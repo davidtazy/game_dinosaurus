@@ -45,7 +45,8 @@ jobs:
         conan install .. 
         cd ..
         
-    - name: build 
+    - name: build
+      env: COVERALLS_ID:${{ secrets.COVERALLS_ID }}
       run: |
         cd build
         cmake ..
