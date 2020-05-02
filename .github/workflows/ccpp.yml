@@ -15,5 +15,5 @@ jobs:
     - uses: actions/checkout@v2
     - name: server x
       run: |
-        apt-getinstall xvfb
+        apt-get install xvfb
     
