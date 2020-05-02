@@ -23,7 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install conan
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: conan kcov 
+    - name: build  kcov  dependency
       run: |
         git clone https://github.com/davidtazy/conan-kcov kcov
         cd kcov
@@ -37,15 +37,22 @@ jobs:
         cd ..
         
 
-    - name: build 
+    - name: install dependencies 
       run: |
         source kcov/activate.sh
         mkdir build 
         cd build
         conan install .. 
+        cd ..
+        
+    - name: build 
+      run: |
         cmake ..
         cmake --build . --target all
+        cd ..
         
     - name: test
       run: |
+        cd build
+        ./test_sfml
         ctest -V
