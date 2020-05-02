@@ -52,11 +52,14 @@ target_link_libraries(test_sfml  Catch2::Catch2 Common)
 
 if( KCOV )
     enable_testing()
-    
+
+    set(COVERALLs_CMD_LINE )
+    if(DEFINED ENV{COVERALLS_ID})
+        set(COVERALLs_CMD_LINE --coveralls-id=$ENV{COVERALLS_ID})
+    endif()
+
     add_test(
         NAME dino_coverage 
-        COMMAND ${KCOV}  --exclude-pattern=/usr/,${CMAKE_CURRENT_LIST_DIR}/src/fsm --include-path=${CMAKE_CURRENT_LIST_DIR}/src  cov $<TARGET_FILE:test_sfml>  
+        COMMAND ${KCOV}  ${COVERALLs_CMD_LINE} --exclude-pattern=/usr/,${CMAKE_CURRENT_LIST_DIR}/src/fsm --include-path=${CMAKE_CURRENT_LIST_DIR}/src  cov $<TARGET_FILE:test_sfml>  
         )
-else()
-    message(FATAL_ERROR "dsfsdfsdf")
 endif()
