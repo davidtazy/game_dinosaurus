@@ -55,6 +55,7 @@ if( KCOV )
 
     set(COVERALLs_CMD_LINE )
     if(DEFINED ENV{COVERALLS_ID})
+        message("********  get coveralls token *************")
         set(COVERALLs_CMD_LINE --coveralls-id=$ENV{COVERALLS_ID})
     endif()
 
