@@ -55,5 +55,5 @@ jobs:
     - name: test
       run: |
         cd build
-        ./test_sfml
-        ctest -V
+        xvfb-run ./test_sfml
+        xvfb-run ctest -V
