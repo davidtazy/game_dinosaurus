@@ -6,32 +6,20 @@
 
 #include "dino.h"
 
-struct JumpPosAnimation : public SubAnimation {
-  sf::Shape& shape;
-  sf::Vector2f init_pos{-1, -1};
-  JumpPosAnimation(sf::Shape& shape) : shape(shape) {}
-
-  void on_start() override { init_pos = shape.getPosition(); }
-
-  void update(int percent) override {
-    shape.setPosition(init_pos.x, init_pos.y + ::sin(-3.14 * percent / 100.) * 150);
-  }
-};
-
 Dino::Dino(const std::string& texture_dir, int height)
     : _anim_idle{texture_dir, "Idle"},
       _anim_walk{texture_dir, "Walk"},
       _anim_run{texture_dir, "Run"},
       _anim_jump{texture_dir, "Jump"},
       _anim_die{texture_dir, "Dead"},
-      _height(height) {
+      _height(height),
+      _jump_pos_animation(_rectangle) {
   for (auto& anim : {&_anim_idle, &_anim_walk, &_anim_run, &_anim_jump, &_anim_die}) {
     anim->set_duration(std::chrono::milliseconds(2500)).set_shape(_rectangle);
   }
 
-  static JumpPosAnimation jump_pos_anim(_rectangle);
   _anim_die.set_repeated(false);
-  _anim_jump.set_repeated(false).set_sub_animation(jump_pos_anim);
+  _anim_jump.set_repeated(false).set_sub_animation(_jump_pos_animation);
   _anim_walk.set_repeated(false);
 
   _next_anim = &_anim_idle;
@@ -96,4 +84,8 @@ void Dino::on_pause() {
 }
 void Dino::on_jump() {
   state.on_jump();
+}
+
+void JumpPosAnimation::update(int percent) {
+  shape.setPosition(init_pos.x, init_pos.y + ::sin(-3.14 * percent / 100.) * 150);
 }

@@ -12,6 +12,16 @@
 #include "animation.h"
 #include "dino_state.h"
 
+struct JumpPosAnimation : public SubAnimation {
+  sf::Shape& shape;
+  sf::Vector2f init_pos{-1, -1};
+  JumpPosAnimation(sf::Shape& shape) : shape(shape) {}
+
+  void on_start() override { init_pos = shape.getPosition(); }
+
+  void update(int percent) override;
+};
+
 class Dino {
  public:
   Dino(const std::string& texture_dir, int height = 100);
@@ -38,4 +48,5 @@ class Dino {
   int _height{100};
   std::function<void()> _on_start_running_callback;
   DinoState state;
+  JumpPosAnimation _jump_pos_animation;
 };
