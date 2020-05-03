@@ -34,8 +34,11 @@ class Dino {
   void on_play();
   void on_pause();
   void on_jump();
+  void on_collision();
 
   const DinoState& get_state() const { return state; }
+
+  sf::FloatRect collision_rect() const;
 
  private:
   Animation _anim_idle;
@@ -49,4 +52,5 @@ class Dino {
   std::function<void()> _on_start_running_callback;
   DinoState state;
   JumpPosAnimation _jump_pos_animation;
+  sf::RectangleShape _collision;
 };

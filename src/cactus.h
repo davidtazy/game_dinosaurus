@@ -9,6 +9,7 @@ struct Cactus {
   void resize(int width, int height);
   void on_timer(std::chrono::milliseconds now);
   void draw(sf::RenderTarget& render, int speed);
+  sf::FloatRect collision_rect() const;
 
   sf::RectangleShape _rectangle;
   int _height{100};

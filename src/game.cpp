@@ -2,6 +2,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 
@@ -66,6 +67,15 @@ int Game::loop(sf::RenderTarget& window, sf::Event event, std::chrono::milliseco
   for (auto& c : cactus)
     c.draw(window, speed);
   dino.draw(window, 0);
+
+  auto dino_bound = dino.collision_rect();
+  if (std::any_of(cactus.begin(), cactus.end(),
+                  [dino_bound](Cactus& c) { return dino_bound.intersects(c.collision_rect()); })) {
+    // std::cerr << " collisionssssss\n";
+
+    speed = 0;
+    dino.on_collision();
+  }
 
   return EXIT_SUCCESS;
 }

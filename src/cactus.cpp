@@ -12,10 +12,11 @@ Cactus CactusFactory::create() {
 Cactus::Cactus(sf::Texture& texture) {
   _rectangle.setTexture(&texture);
   _rectangle.setSize(sf::Vector2f{100, 150});
+  // _rectangle.setOutlineThickness(3);
 }
 
 void Cactus::resize(int width, int height) {
-  _rectangle.setPosition(sf::Vector2f{width - 50, height - _rectangle.getSize().y - _height});
+  _rectangle.setPosition(sf::Vector2f{width - 50., height - _rectangle.getSize().y - _height});
 }
 
 void Cactus::draw(sf::RenderTarget& render, int speed) {
@@ -25,10 +26,31 @@ void Cactus::draw(sf::RenderTarget& render, int speed) {
     _rectangle.setPosition(sf::Vector2f{2 * width, height - _rectangle.getSize().y - _height});
   }
   render.draw(_rectangle);
+
+  if (0) {
+    sf::Transform t;
+    t.translate(0, 50);
+
+    sf::RectangleShape col;
+    col.setSize(_rectangle.getSize());
+    col.setPosition(_rectangle.getPosition());
+    col.setOutlineThickness(5);
+    col.setOutlineColor(sf::Color::Blue);
+
+    render.draw(col, t);
+  }
 }
 
 void Cactus::on_timer(std::chrono::milliseconds now) {
   // move
+}
+
+sf::FloatRect Cactus::collision_rect() const {
+  sf::Transform t;
+  t.translate(0, 50);
+
+  sf::FloatRect r(_rectangle.getPosition(), _rectangle.getSize());
+  return t.transformRect(r);
 }
 
 void CactusFactory::untested(){};

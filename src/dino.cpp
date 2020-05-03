@@ -14,6 +14,11 @@ Dino::Dino(const std::string& texture_dir, int height)
       _anim_die{texture_dir, "Dead"},
       _height(height),
       _jump_pos_animation(_rectangle) {
+  // _rectangle.setOutlineThickness(3);
+  // _collision.setOutlineThickness(3);
+  _collision.setSize(sf::Vector2f(50., 100.));
+
+  // animation
   for (auto& anim : {&_anim_idle, &_anim_walk, &_anim_run, &_anim_jump, &_anim_die}) {
     anim->set_duration(std::chrono::milliseconds(2500)).set_shape(_rectangle);
   }
@@ -59,6 +64,20 @@ void Dino::resize(int width, int height) {
 
 void Dino::draw(sf::RenderTarget& render, int speed) {
   render.draw(_rectangle);
+
+  if (0) {
+    sf::Transform t;
+    t.translate(50, 80);
+
+    render.draw(_collision, t * _rectangle.getTransform());
+  }
+}
+
+sf::FloatRect Dino::collision_rect() const {
+  sf::Transform t;
+  t.translate(50, 80);
+  sf::FloatRect r(_collision.getPosition(), _collision.getSize());
+  return (t * _rectangle.getTransform()).transformRect(r);
 }
 
 void Dino::on_timer(std::chrono::milliseconds now) {
@@ -84,6 +103,10 @@ void Dino::on_pause() {
 }
 void Dino::on_jump() {
   state.on_jump();
+}
+
+void Dino::on_collision() {
+  state.on_collision();
 }
 
 void JumpPosAnimation::update(int percent) {
